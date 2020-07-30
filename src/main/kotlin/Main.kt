@@ -1,4 +1,5 @@
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.PublishSubject
 
 fun main(args: Array<String>) {
@@ -22,11 +23,21 @@ fun main(args: Array<String>) {
       }
 
       // Add code to update dealtHand here
-
+      if (points(hand) > 21) {
+        dealtHand.onError(HandError.Busted())
+      } else {
+        dealtHand.onNext(hand)
+      }
     }
 
     // Add subscription to dealtHand here
-
+    subscriptions.add(
+            dealtHand.subscribeBy(
+                    onNext = { hand -> println("${cardString(hand)} for ${points(hand)} points") },
+                    onError = { error -> println(error)  }
+            )
+    )
     deal(3)
+    subscriptions.dispose()
   }
 }
